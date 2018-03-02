@@ -4,7 +4,7 @@ OpenVPNConnect is a WiFi Pineapple Module that allows you to connect to an openv
 ## WIP!!!
 
 This is stable and freely available to use, but it is a WIP at the moment.
-If this approved by Hak5 you might see this is in your module manager in the near future ;).
+If this is approved by Hak5 you might see this is in your module manager in the near future ;).
 
 # TODO:
 1. Add a toggle giving VPN access to clients (currently the default setting)
