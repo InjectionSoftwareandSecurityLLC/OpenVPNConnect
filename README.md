@@ -8,4 +8,5 @@ If this is approved by Hak5 you might see this is in your module manager in the 
 
 # TODO:
 ~~1. Add a toggle giving VPN access to clients (currently the default setting)~~
+
 ~~2. Add the ability to upload .ovpn certs via the module interface~~
