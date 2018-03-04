@@ -1,11 +1,23 @@
 /* This is our AngularJS controller, called "ExampleController". */
-registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$window', function($api, $scope, $timeout, $window) {
+registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$window', '$http', function($api, $scope, $timeout, $window, $http) {
     
     
-    $scope.workspace = {config: "", pass: "", flags: "", setupcontent: "", outputcontent: ""};
+    $scope.workspace = {config: "", 
+                        pass: "", 
+                        flags: "", 
+                        sharedconnection: 
+                        false, setupcontent: "", 
+                        outputcontent: "", 
+                        availablecerts: [],
+                        uploadstatusLabel: "",
+                        uploadstatus: ""};
     $scope.content = "";
     $scope.installLabel = "default";
     $scope.installLabelText = "Checking..."
+    $scope.selectedFiles = [];
+    $scope.uploading = false;
+
+    $scope.tests = ["yo", "ayyy"];
 
     $scope.handleDependencies = function(){
 
@@ -51,21 +63,29 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         }, function(response) {
             if (response.success === true) {
                 $scope.workspace.setupcontent = response.content;
+                
+                for(var i = 0; i <= response.certs.length - 1; i++){
+                    $scope.workspace.availablecerts.push(response.certs[i].name);
+                }
             }
             //console.log(response) //Log the response to the console, this is useful for debugging.
         });
     }
 
     initializeModule();
+
+    $scope.setConfig = function(cert){
+        $scope.workspace.config = cert;
+    }
     
     $scope.startVPN = function() {
-        //console.log("encode pressed");
         $api.request({
             module: 'OpenVPNConnect', 
             action: 'startVPN',
             data: [$scope.workspace.config,
                   $scope.workspace.pass,
-                  $scope.workspace.flags]
+                  $scope.workspace.flags,
+                  $scope.workspace.sharedconnection]
         }, function(response) {
             if (response.success === true) {
                 $scope.workspace.outputcontent = response.content;
@@ -75,7 +95,6 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
     }
 
     $scope.stopVPN = function() {
-        //console.log("encode pressed");
         $api.request({
             module: 'OpenVPNConnect', 
             action: 'stopVPN'
@@ -87,6 +106,54 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         });
     }
     
-    
+    //File Upload Code
+
+    $scope.setSelectedFiles = function(){
+		files = document.getElementById("selectedFiles").files;
+		for (var x = 0; x < files.length; x++) {
+			$scope.selectedFiles.push(files[x]);
+		}
+    };
+
+    $scope.removeSelectedFile = function(file){
+		var x = $scope.selectedFiles.length;
+		while (x--) {
+			if ($scope.selectedFiles[x] === file) {
+				$scope.selectedFiles.splice(x,1);
+			}
+		}
+    };
+
+    $scope.uploadFile = function(){
+		$scope.uploading = true;
+		
+		var fd = new FormData();
+		for (x = 0; x < $scope.selectedFiles.length; x++) {
+			fd.append($scope.selectedFiles[x].name, $scope.selectedFiles[x]);
+		}
+		$http.post("/modules/OpenVPNConnect/api/module.php", fd, {
+			transformRequest: angular.identity,
+			headers: {'Content-Type': undefined}
+		}).then(function(response) {
+            var failCount = 0;
+			for (var key in response) {
+				if (response.hasOwnProperty(key)) {
+					if (response.key == "Failed") {
+                        failCount += 1;
+						alert("Failed to upload " + key);
+					}
+				}
+            }
+            if(failCount > 0){
+                $scope.workspace.uploadstatusLabel = "One or more files failed to upload!";
+                $scope.workspace.uploadstatus = "danger";
+            }else{
+                $scope.workspace.uploadstatusLabel = "Upload Success!";
+                $scope.workspace.uploadstatus = "success";
+            }
+			$scope.selectedFiles = [];
+			$scope.uploading = false;
+		});
+     };
     
 }]);

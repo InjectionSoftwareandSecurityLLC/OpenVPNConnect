@@ -3,6 +3,46 @@
 namespace pineapple;
 
 
+define('__UPLOAD__', "/root/vpn_config/");
+
+if (!empty($_FILES)) {
+	$response = [];
+	foreach ($_FILES as $file) {
+		$tempPath = $file[ 'tmp_name' ];
+		$name = $file['name'];
+		$type = pathinfo($file['name'], PATHINFO_EXTENSION);
+		
+		// Do not accept any file other than .ovpn
+		if ($type != "ovpn") {
+			continue;
+		}
+		
+		// Ensure the upload directory exists
+		if (!file_exists(__UPLOAD__)) {
+			if (!mkdir(__UPLOAD__, 0755, true)) {
+                $response[$name] = "Failed. Unable to upload because vpn_certs directory does not exist/could not be created!";
+                continue;
+			}
+		}
+		
+		$uploadPath = __UPLOAD__ . $name;
+		$res = move_uploaded_file( $tempPath, $uploadPath );
+		
+		if ($res) {
+			$response[$name] = "Success";
+		} else {
+			$response[$name] = "Failed";
+		}
+	}
+    echo json_encode($response);
+    
+    die();
+}
+
+
+
+
+
 /* The class name must be the name of your module, without spaces. */
 /* It must also extend the "Module" class. This gives your module access to API functions */
 class OpenVPNConnect extends Module{
@@ -63,9 +103,18 @@ class OpenVPNConnect extends Module{
             }
         }
 
-        
+
+        //Get Available Certs
+
+        $certs = preg_grep('/^([^.])/', scandir("/root/vpn_config/"));
+        $cert_arr = array();
+        foreach ($certs as $cert){
+            array_push($cert_arr, (object)array('name' => $cert));
+        }
+
         $this->response = array("success" => true,
-                                "content" => $result);
+                                "content" => $result,
+                                "certs" => $cert_arr);
 
     }
 
@@ -114,12 +163,13 @@ class OpenVPNConnect extends Module{
             $open_vpn_cmd .= $openvpn_flags;
         }
 
-
+        
+        if($inputData[3] == true){
         //Share VPN With Clients Connecting
-        $this->execBackground("iptables -t nat -A POSTROUTING -s 172.16.42.0/24 -o tun0 -j MASQUERADE");
-        $this->execBackground("iptables -A FORWARD -s 172.16.42.0/24 -o tun0 -j ACCEPT");
-        $this->execBackground("iptables -A FORWARD -d 172.16.42.0/24 -m state --state ESTABLISHED,RELATED -i tun0 -j ACCEPT");
-
+            $this->execBackground("iptables -t nat -A POSTROUTING -s 172.16.42.0/24 -o tun0 -j MASQUERADE");
+            $this->execBackground("iptables -A FORWARD -s 172.16.42.0/24 -o tun0 -j ACCEPT");
+            $this->execBackground("iptables -A FORWARD -d 172.16.42.0/24 -m state --state ESTABLISHED,RELATED -i tun0 -j ACCEPT");
+        }
 
         $result = $this->execBackground($open_vpn_cmd);
         
@@ -141,6 +191,8 @@ class OpenVPNConnect extends Module{
 
   
 }
+
+
 
 
 
