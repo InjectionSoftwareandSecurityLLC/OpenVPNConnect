@@ -87,14 +87,14 @@ class OpenVPNConnect extends Module{
 
     private function initializeModule(){
 
-        $result = exec('cd ~ && ls | grep vpn_config');
+        $result = exec('cd /root && ls | grep vpn_config');
 
         if($result == 'vpn_config'){
             $result = "VPN Connect is ready!";
         }else{
-            $this->execBackground('cd ~ && mkdir vpn_config');
+            $this->execBackground('cd /root && mkdir vpn_config');
 
-            $result = exec('cd ~ && ls | grep vpn_config');
+            $result = exec('cd /root && ls | grep vpn_config');
 
             if($result == 'vpn_config'){
                 $result = "VPN Connect is ready!";
