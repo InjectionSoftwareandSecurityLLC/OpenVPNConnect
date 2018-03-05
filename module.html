@@ -1,11 +1,7 @@
-<!-- This HTML has bootstrap classes such as "col-md-12" and "jumbotron". For more information, see http://getbootstrap.com/css/ -->
-<!-- This HTML makes use of AngularJS data-bindings and controllers. For more information, see https://docs.angularjs.org/api/ -->
-<!-- Don't forget to look at the module.js and module.php files too! -->
-<!-- This HTML is a template for generated modules via the Module Maker. -->
 <div class="col-md-12" ng-controller="openVPNConnectController">
 	<div class="panel-group">
 		<div class="col-md-12">
-			<!-- Base64 Encode/Decode Panel -->
+			<!-- OpenVPN Connect Title Panel -->
 			<div class="panel panel-default">
 				<div class="panel-header text-muted text-center">
 					<h3>OpenVPN Connect
@@ -13,7 +9,7 @@
 				</div>
 				<div id="main-panel" class="panel panel-default">
 					<div class="panel-body">
-						<!-- output section -->
+						<!-- Dependency Installer UI -->
 						<div class="panel-body">
 							<div class="form-group">
 								<label class="control-label text-center">Dependencies:</label>
@@ -26,7 +22,7 @@
 								</p>
 							</div>
 						</div>
-						<!-- input section -->
+						<!-- OpenVPN Cert Selector -->
 						<div class="panel-body">
 							<form class="form-horizontal">
 								<div class="form-group">
@@ -37,7 +33,7 @@
 										<div>
 											<label class="control-label">
 												<a href="javascript:;" data-toggle="collapse" data-parent="#accordion" data-target="#collapseCertList">
-													<button type="button" class="btn btn-default">
+													<button type="button" class="btn btn-default" ng-click="refreshCertList()">
                                                                          Select Cert +
                                                                     </button>
 												</a>
@@ -55,6 +51,8 @@
 											</div>
 										</div>
 									</p>
+
+									<!-- OpenVPN Connect Option Form -->
 									<label class="control-label text-center">VPN Config Name:</label>
 									<a href="javascript:;" ng-click="workspace.config = ''">Clear</a>
 									<p>
@@ -81,11 +79,10 @@
 									</div>
 								</form>
 							</div>
-							<!-- output section -->
+							<!-- OpenVPN Status Section -->
 							<div class="panel-body">
 								<div class="form-group">
-									<label class="control-label text-center">Output</label>
-									<a href="javascript:;" ng-click="workspace.outputcontent = ''">Clear</a>
+									<label class="control-label text-center">OpenVPN Status</label>
 									<p>
 										<textarea class="form-control" rows="1" ng-model="workspace.outputcontent" placeholder="" readonly></textarea>
 									</p>
@@ -94,6 +91,7 @@
 						</div>
 					</div>
 				</div>
+				<!-- OpenVPN Cert Upload Modal -->
 				<div id="ovpn_upload_view" class="modal fade" role="dialog">
 					<div class="modal-dialog">
 						<div class="modal-content">

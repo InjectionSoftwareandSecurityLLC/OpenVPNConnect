@@ -1,10 +1,12 @@
 <?php 
 
+// Define the pineapple namespace
 namespace pineapple;
 
-
+// Upload Directory where we store vpn_configs
 define('__UPLOAD__', "/root/vpn_config/");
 
+// File upload form that the angular function makes a call to
 if (!empty($_FILES)) {
 	$response = [];
 	foreach ($_FILES as $file) {
@@ -43,10 +45,10 @@ if (!empty($_FILES)) {
 
 
 
-/* The class name must be the name of your module, without spaces. */
-/* It must also extend the "Module" class. This gives your module access to API functions */
+/* Main module class for OpenVPNConnect */
 class OpenVPNConnect extends Module{
 
+    // Set up our routes for our angular functions to call
     public function route(){
 
         switch ($this->request->action) {
@@ -69,6 +71,8 @@ class OpenVPNConnect extends Module{
         }
     }
 
+
+    // Checks the dependencies using the pineapple API functions 
     private function checkDependencies(){
 
         if($this->checkDependency('openvpn')){
@@ -85,6 +89,7 @@ class OpenVPNConnect extends Module{
 
     }
 
+    // Initializes the module by checking for/creating the required vpn_config directory in /root
     private function initializeModule(){
 
         $result = exec('cd /root && ls | grep vpn_config');
@@ -118,6 +123,7 @@ class OpenVPNConnect extends Module{
 
     }
 
+    // Handles dependency installation and removal
     private function handleDependencies(){
     
 
@@ -133,6 +139,7 @@ class OpenVPNConnect extends Module{
                                 "content" => $messsage);
     }
 
+    // Builds the openvpn command string and calls it to star the VPN
     private function startVPN(){
 
         $inputData = $this->request->data;
@@ -178,6 +185,7 @@ class OpenVPNConnect extends Module{
     }
 
 
+    // Calls pkill to kill the OpenVPN process and stop the VPN
     private function stopVPN(){
 
         //Remove password file that could have been created, don't want any creds lying around ;)

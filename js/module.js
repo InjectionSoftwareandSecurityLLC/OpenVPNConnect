@@ -1,24 +1,28 @@
-/* This is our AngularJS controller, called "ExampleController". */
+/* Main AngularJS openVPNConnectController  */
 registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$window', '$http', function($api, $scope, $timeout, $window, $http) {
     
     
+    // Workspace Variables. Each value is populated by the form or displays to the form.
     $scope.workspace = {config: "", 
                         pass: "", 
                         flags: "", 
-                        sharedconnection: 
-                        false, setupcontent: "", 
+                        sharedconnection: false, 
+                        setupcontent: "", 
                         outputcontent: "", 
                         availablecerts: [],
                         uploadstatusLabel: "",
                         uploadstatus: ""};
+
+    /* Other variables used to display content or assist the dependency installation and file upload
+       functions
+    */
     $scope.content = "";
     $scope.installLabel = "default";
     $scope.installLabelText = "Checking..."
     $scope.selectedFiles = [];
     $scope.uploading = false;
 
-    $scope.tests = ["yo", "ayyy"];
-
+    // Call a function to install/uninstall dependencies for the module
     $scope.handleDependencies = function(){
 
         $scope.workspace.setupcontent = "Handling dependencies please wait...";
@@ -40,7 +44,11 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
 
     }
     
-
+    /* Checks the current status of the dependencies for the module and displays 
+       it via the dependency install/uninstall button to the user. 
+       This is checked each time the app is loaded or when the user 
+       installs/uninstalls dependencies manually
+    */
     var checkDependencies = function(){
         $api.request({
             module: 'OpenVPNConnect', 
@@ -54,8 +62,12 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         });
     }
 
+    // Call the checkDependencies function on page load
     checkDependencies();
 
+    /* Initializes module by creating necessary folder structures and scanning for uploaded certs
+       this function is called each time the app is loaded to make sure the module is set up correctly
+    */
     var initializeModule = function(){
         $api.request({
             module: 'OpenVPNConnect', 
@@ -72,12 +84,28 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         });
     }
 
+    // Call the initializeModule function on page load
     initializeModule();
 
+    /* Just calls the initializeModule function to refresh the cert list when the 
+        user clicks the drop down menu button
+    */
+    $scope.refreshCertList = function(){
+        $scope.workspace.availablecerts = [];
+        initializeModule();
+    }
+
+    // Sets the current config to use for the VPN connection
     $scope.setConfig = function(cert){
         $scope.workspace.config = cert;
     }
     
+
+    /* Calls the startVPN function, passes all the form params to the API to run the OpenVPN command
+       Users can pass a config, an option password, and optional command line flags to run with the
+       openvpn command line utility. Also the shared connection open lets the user share the 
+       VPN connection with its clients
+    */
     $scope.startVPN = function() {
         $api.request({
             module: 'OpenVPNConnect', 
@@ -94,6 +122,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         });
     }
 
+    // This function calls the API to kill the openvpn process and stop the VPN
     $scope.stopVPN = function() {
         $api.request({
             module: 'OpenVPNConnect', 
@@ -106,7 +135,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         });
     }
     
-    //File Upload Code
+    //File Upload Code, the first two functions prep the files for upload in the modal
 
     $scope.setSelectedFiles = function(){
 		files = document.getElementById("selectedFiles").files;
@@ -124,6 +153,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
 		}
     };
 
+    // Actual file upload function to upload the .ovpn certs
     $scope.uploadFile = function(){
 		$scope.uploading = true;
 		
