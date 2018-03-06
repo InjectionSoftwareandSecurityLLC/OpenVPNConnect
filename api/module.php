@@ -160,12 +160,13 @@ class OpenVPNConnect extends Module{
                                 "content" => "VPN Stopped...");
     }
 
-
+    // Uploads the .ovnp recieved from the service
     private function uploadFile(){
                    
             $inputData = $this->request->file;
-            //$encodedData = str_replace(' ','+',$encodedData);
+
             $fileName = $inputData[0];
+
             $file = base64_decode($inputData[1]);
 
             $response = [];

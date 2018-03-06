@@ -153,7 +153,9 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
 		}
     };
 
-    // Actual file upload function to upload the .ovpn certs
+    /* File upload function. Instaitates a FileReader object the makes a promise call to 
+       doUpload once the async reader call is complete on each iteration
+    */
     $scope.uploadFile = function(){
 
         $scope.uploading = true;
@@ -173,6 +175,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         };
 
 
+     // Read file function to handle a Promise for multiple file uploads using FilerReader
      function readFile(file, file_name, files_to_upload){
         return new Promise((resolve, reject) => {
           var fr = new FileReader();  
@@ -185,8 +188,10 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
       }
 
 
+      /* Actually performs the upload request to the API. Passes the file name and a base64 encoded
+         file to be uploaded by the service
+      */
      var doUpload = function(file_name, file, files_to_upload){
-
         
         $api.request({
             module: 'OpenVPNConnect', 
