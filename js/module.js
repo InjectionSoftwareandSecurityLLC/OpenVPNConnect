@@ -155,28 +155,37 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
 
     // Actual file upload function to upload the .ovpn certs
     $scope.uploadFile = function(){
-        $scope.uploading = true;
-        var fileReader = new FileReader();
 
-        var fileData = []
+        $scope.uploading = true;
+
 		
 		for (x = 0; x < $scope.selectedFiles.length; x++) {
 
+            var fileReader = new FileReader();
+
             var fileName = $scope.selectedFiles[x].name;
 
-            fileReader.readAsDataURL($scope.selectedFiles[x]);
+            var filesToUpload = $scope.selectedFiles.length;
 
-            fileReader.onload = function(e) {
-                var file = fileReader.result.split(',')[1];
-
-                doUpload(fileName, file);
+            readFile($scope.selectedFiles[x], fileName, filesToUpload);
 
             }
-        }
+        };
 
-     };
 
-     var doUpload = function(file_name, file){
+     function readFile(file, file_name, files_to_upload){
+        return new Promise((resolve, reject) => {
+          var fr = new FileReader();  
+          fr.onload = () => {
+            final_file = fr.result.split(',')[1]
+            resolve(doUpload(file_name, final_file, files_to_upload - 1));
+          };
+          fr.readAsDataURL(file);
+        });
+      }
+
+
+     var doUpload = function(file_name, file, files_to_upload){
 
         
         $api.request({
@@ -194,10 +203,11 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
                 $scope.workspace.uploadstatusLabel = "One or more files failed to upload!";
                 $scope.workspace.uploadstatus = "danger";
             }
-
-            $scope.selectedFiles = [];
-            $scope.uploading = false;
         
+            if(files_to_upload === 0){
+                $scope.selectedFiles = [];
+                $scope.uploading = false;
+            }
 
             //console.log(response) //Log the response to the console, this is useful for debugging.
         });
