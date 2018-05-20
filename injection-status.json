@@ -3,6 +3,9 @@
     "version": "1.0",
     "platform": "plugin",
     "progress": "100%",
-    "state": "done"
+    "state": "done",   
+    "released": true,
+    "release-version": "1.0",
+    "download-url": "https://github.com/hak5/wifipineapple-modules/tree/master/OpenVPNConnect"
 
 }
