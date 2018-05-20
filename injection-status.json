@@ -1,6 +1,8 @@
-{
+{   
+    "name": "OpenVPNConnect"
+    "version": "1.0",
     "platform": "plugin",
     "progress": "100%",
-    "state": "done",
-    "version": "1.0"
+    "state": "done"
+
 }
