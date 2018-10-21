@@ -118,23 +118,35 @@ class OpenVPNConnect extends Module{
             return;
         }
 
-        if($inputData[1] != ''){
+
+        if($inputData[1] != '' && $inputData[2] != ''){
+            //Create auth.txt file for openvpn command to read in
+            $config_user = $inputData[1];
+            $config_pass = $inputData[2];
+            $config_string = $config_user . PHP_EOL . $config_pass;
+            $auth_file = fopen("/tmp/vpn_auth.txt", "w");
+            fwrite($auth_file, $config_string);
+            fclose($auth_file);
+            $open_vpn_cmd .= "--auth-nocache --auth-user-pass /tmp/vpn_auth.txt ";
+
+        }else if($inputData[2] != ''){
 
             //Create password file for openvpn command to read in
-            $config_pass = $inputData[1];
+            $config_pass = $inputData[2];
             $pass_file = fopen("/tmp/vpn_pass.txt", "w");
             fwrite($pass_file, $config_pass);
             fclose($pass_file);
             $open_vpn_cmd .= "--auth-nocache --askpass /tmp/vpn_pass.txt ";
         }
 
-        if($inputData[2] != ''){
-            $openvpn_flags = $inputData[2];
+
+        if($inputData[3] != ''){
+            $openvpn_flags = $inputData[3];
             $open_vpn_cmd .= $openvpn_flags;
         }
 
         
-        if($inputData[3] == true){
+        if($inputData[4] == true){
         //Share VPN With Clients Connecting
             $gateway = exec("uci get network.lan.gateway");
             $netmask = exec("uci get network.lan.netmask");
@@ -154,7 +166,8 @@ class OpenVPNConnect extends Module{
     // Calls pkill to kill the OpenVPN process and stop the VPN
     private function stopVPN(){
 
-        //Remove password file that could have been created, don't want any creds lying around ;)
+        //Remove any creds files that could have been created, don't want any creds lying around ;)
+        unlink("/tmp/vpn_auth.txt");
         unlink("/tmp/vpn_pass.txt");
 
         //Delete any iptable rules that may have been created for sharing connection with clients                

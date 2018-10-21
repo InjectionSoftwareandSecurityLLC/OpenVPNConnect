@@ -4,6 +4,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
     
     // Workspace Variables. Each value is populated by the form or displays to the form.
     $scope.workspace = {config: "", 
+                        user: "",
                         pass: "", 
                         flags: "", 
                         sharedconnection: false, 
@@ -111,6 +112,7 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
             module: 'OpenVPNConnect', 
             action: 'startVPN',
             data: [$scope.workspace.config,
+                  $scope.workspace.user,
                   $scope.workspace.pass,
                   $scope.workspace.flags,
                   $scope.workspace.sharedconnection]

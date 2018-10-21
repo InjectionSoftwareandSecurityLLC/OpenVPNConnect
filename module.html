@@ -58,7 +58,12 @@
 									<p>
 										<input class="form-control" ng-model="workspace.config" placeholder="Enter input"></input>
 									</p>
-									<label class="control-label text-center">VPN Config Password (Optional):</label>
+									<label class="control-label text-center">VPN Config User (Optional, makes use of --auth-user-pass):</label>
+									<a href="javascript:;" ng-click="workspace.user = ''">Clear</a>
+									<p>
+										<input class="form-control" ng-model="workspace.user" placeholder="Enter input"></input>
+									</p>
+									<label class="control-label text-center">VPN Config Password (Optional, falls back to --askpass if no user is provided):</label>
 									<a href="javascript:;" ng-click="workspace.pass = ''">Clear</a>
 									<p>
 										<input class="form-control" type="password" ng-model="workspace.pass" placeholder="Enter input"></input>
