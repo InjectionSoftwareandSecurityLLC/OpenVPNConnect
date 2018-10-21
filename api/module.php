@@ -102,7 +102,7 @@ class OpenVPNConnect extends Module{
                                 "content" => $messsage);
     }
 
-    // Builds the openvpn command string and calls it to star the VPN
+    // Builds the openvpn command string and calls it to start the VPN
     private function startVPN(){
 
         $inputData = $this->request->data;
@@ -136,9 +136,12 @@ class OpenVPNConnect extends Module{
         
         if($inputData[3] == true){
         //Share VPN With Clients Connecting
-            $this->execBackground("iptables -t nat -A POSTROUTING -s 172.16.42.0/24 -o tun0 -j MASQUERADE");
-            $this->execBackground("iptables -A FORWARD -s 172.16.42.0/24 -o tun0 -j ACCEPT");
-            $this->execBackground("iptables -A FORWARD -d 172.16.42.0/24 -m state --state ESTABLISHED,RELATED -i tun0 -j ACCEPT");
+            $gateway = exec("uci get network.lan.gateway");
+            $netmask = exec("uci get network.lan.netmask");
+
+            $this->execBackground("iptables -t nat -A POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
+            $this->execBackground("iptables -A FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
+            $this->execBackground("iptables -A FORWARD -d ". $gateway ."/". $netmask ." -m state --state ESTABLISHED,RELATED -i tun0 -j ACCEPT");
         }
 
         $result = $this->execBackground($open_vpn_cmd);
@@ -154,7 +157,16 @@ class OpenVPNConnect extends Module{
         //Remove password file that could have been created, don't want any creds lying around ;)
         unlink("/tmp/vpn_pass.txt");
 
-        exec("pkill openvpn");
+        //Delete any iptable rules that may have been created for sharing connection with clients                
+        $gateway = exec("uci get network.lan.gateway");
+        $netmask = exec("uci get network.lan.netmask");
+
+        $this->execBackground("iptables -t nat -D POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
+        $this->execBackground("iptables -D FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
+        $this->execBackground("iptables -D FORWARD -d ". $gateway ."/". $netmask ." -m state --state ESTABLISHED,RELATED -i tun0 -j ACCEPT");
+        
+        //Kill openvpn
+        $this->execBackground("pkill openvpn");
 
         $this->response = array("success" => true,
                                 "content" => "VPN Stopped...");
