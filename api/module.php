@@ -136,8 +136,8 @@ class OpenVPNConnect extends Module{
         
         if($inputData[3] == true){
         //Share VPN With Clients Connecting
-            $gateway = exec("uci get network.lan.gateway")
-            $netmask = exec("uci get network.lan.netmask")
+            $gateway = exec("uci get network.lan.gateway");
+            $netmask = exec("uci get network.lan.netmask");
 
             $this->execBackground("iptables -t nat -A POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
             $this->execBackground("iptables -A FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
@@ -158,8 +158,8 @@ class OpenVPNConnect extends Module{
         unlink("/tmp/vpn_pass.txt");
 
         //Delete any iptable rules that may have been created for sharing connection with clients                
-        $gateway = exec("uci get network.lan.gateway")
-        $netmask = exec("uci get network.lan.netmask")
+        $gateway = exec("uci get network.lan.gateway");
+        $netmask = exec("uci get network.lan.netmask");
 
         $this->execBackground("iptables -t nat -D POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
         $this->execBackground("iptables -D FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
