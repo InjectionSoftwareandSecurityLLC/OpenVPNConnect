@@ -41,18 +41,26 @@ class OpenVPNConnect extends Module{
 
     // Checks the dependencies using the pineapple API functions 
     private function checkDependencies(){
-
+        $installedFlag = false;
         if($this->checkDependency('openvpn')){
             $installLabel = 'success';
             $installLabelText = 'Installed';
+            $installButtonWidth = "90px";
+            $installLabelSDText = "Installed (SD Card)";
+            $installedFlag = true;
         }else{
             $installLabel = 'danger';
-            $installLabelText = 'Not Installed';
+            $installLabelText = 'Not Installed (Local Storage)';
+            $installButtonWidth = "210px";
+            $installLabelSDText = "Not Installed (SD Card)";
         }
          
         $this->response = array("success" => true,
                                 "label" => $installLabel,
-                                "text"   => $installLabelText);
+                                "text"  => $installLabelText,
+                                "buttonWidth" => $installButtonWidth,
+                                "textSD" => $installLabelSDText,
+                                "installed" => $installedFlag);
 
     }
 
@@ -91,7 +99,7 @@ class OpenVPNConnect extends Module{
     }
 
     // Handles dependency installation and removal
-    private function handleDependencies(){
+    private function handleDependencies($sd){
     
 
         if($this->checkDependency('openvpn')){
@@ -110,9 +118,11 @@ class OpenVPNConnect extends Module{
         }
          
         $this->response = array("success" => true,
-                                "content" => $messsage);
+                                "content" => $messsage,
+                                "test" => $sd);
     }
 
+    // Helper function to handle dependency installation and removal for sd card. Passes the SD flag to the real handleDependencies() function
     private function handleDependenciesSDCard(){
 
         $sd = true;
