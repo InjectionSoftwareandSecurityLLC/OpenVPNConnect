@@ -26,29 +26,41 @@ class OpenVPNConnect extends Module{
             case 'handleDependencies':
                 $this->handleDependencies();
                 break;
+            case 'handleDependenciesSDCard':
+                $this->handleDependenciesSDCard();
+                break;
             case 'checkDependencies':
                 $this->checkDependencies();
                 break;
             case 'uploadFile':
                 $this->uploadFile();
+                break;
         }
     }
 
 
     // Checks the dependencies using the pineapple API functions 
     private function checkDependencies(){
-
+        $installedFlag = false;
         if($this->checkDependency('openvpn')){
             $installLabel = 'success';
             $installLabelText = 'Installed';
+            $installButtonWidth = "90px";
+            $installLabelSDText = "Installed (SD Card)";
+            $installedFlag = true;
         }else{
             $installLabel = 'danger';
-            $installLabelText = 'Not Installed';
+            $installLabelText = 'Not Installed (Local Storage)';
+            $installButtonWidth = "210px";
+            $installLabelSDText = "Not Installed (SD Card)";
         }
          
         $this->response = array("success" => true,
                                 "label" => $installLabel,
-                                "text"   => $installLabelText);
+                                "text"  => $installLabelText,
+                                "buttonWidth" => $installButtonWidth,
+                                "textSD" => $installLabelSDText,
+                                "installed" => $installedFlag);
 
     }
 
@@ -87,19 +99,36 @@ class OpenVPNConnect extends Module{
     }
 
     // Handles dependency installation and removal
-    private function handleDependencies(){
+    private function handleDependencies($sd){
     
 
         if($this->checkDependency('openvpn')){
             exec('opkg remove openvpn-openssl');
             $messsage = "Dependencies should now be removed! Note: the vpn_config directory is NOT removed in this process. Please wait for the page to refresh...";
         }else{
-            $this->installDependency('openvpn-openssl');
-            $messsage = "Depedencies should now be installed! Please wait for the page to refresh...";
+            if($sd){
+                $this->execBackground('opkg update');
+                $this->execBackground('opkg install openvpn-openssl --dest sd');
+                $messsage = "Depedencies should now be installed! (Installed to SD card) Please wait for the page to refresh...";
+            }else{
+                $this->installDependency('openvpn-openssl');
+                $messsage = "Depedencies should now be installed! (Installed to local storage) Please wait for the page to refresh...";
+            }
+
         }
          
         $this->response = array("success" => true,
-                                "content" => $messsage);
+                                "content" => $messsage,
+                                "test" => $sd);
+    }
+
+    // Helper function to handle dependency installation and removal for sd card. Passes the SD flag to the real handleDependencies() function
+    private function handleDependenciesSDCard(){
+
+        $sd = true;
+
+        return handleDependencies($sd);
+
     }
 
     // Builds the openvpn command string and calls it to start the VPN
@@ -148,8 +177,8 @@ class OpenVPNConnect extends Module{
         
         if($inputData[4] == true){
         //Share VPN With Clients Connecting
-            $gateway = exec("uci get network.lan.gateway");
-            $netmask = exec("uci get network.lan.netmask");
+            $gateway = uciGet("network.lan.gateway");
+            $netmask = uciGet("network.lan.netmask");
 
             $this->execBackground("iptables -t nat -A POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
             $this->execBackground("iptables -A FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
@@ -171,8 +200,8 @@ class OpenVPNConnect extends Module{
         unlink("/tmp/vpn_pass.txt");
 
         //Delete any iptable rules that may have been created for sharing connection with clients                
-        $gateway = exec("uci get network.lan.gateway");
-        $netmask = exec("uci get network.lan.netmask");
+        $gateway = uciGet("network.lan.gateway");
+        $netmask = uciGet("network.lan.netmask");
 
         $this->execBackground("iptables -t nat -D POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
         $this->execBackground("iptables -D FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");

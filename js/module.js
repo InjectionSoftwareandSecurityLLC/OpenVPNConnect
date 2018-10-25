@@ -19,14 +19,17 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
     */
     $scope.content = "";
     $scope.installLabel = "default";
-    $scope.installLabelText = "Checking..."
+    $scope.installLabelText = "Checking...";
+    $scope.installSDLabelText = "Checking...";
     $scope.selectedFiles = [];
+    $scope.hideSDDependency = false;
     $scope.uploading = false;
+    $scope.installButtonWidth = "210px";
 
-    // Call a function to install/uninstall dependencies for the module
+    // Call a function to install/uninstall dependencies for the module (install to local storage)
     $scope.handleDependencies = function(){
 
-        $scope.workspace.setupcontent = "Handling dependencies please wait...";
+        $scope.workspace.setupcontent = "Handling dependencies (local storage) please wait...";
 
         $api.request({
             module: 'OpenVPNConnect', 
@@ -45,6 +48,28 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
 
     }
     
+        // Call a function to install/uninstall dependencies for the module (install to the SD card)
+        $scope.handleDependenciesSDCard = function(){
+
+            $scope.workspace.setupcontent = "Handling dependencies (SD card) please wait...";
+
+            $api.request({
+                module: 'OpenVPNConnect', 
+                action: 'handleDependenciesSDCard',
+            }, function(response) {
+                if (response.success === true) {
+
+                    $scope.workspace.setupcontent = response.content;
+
+                    checkDependencies();
+
+                    $timeout(function() {$window.location.reload();}, 5000);
+                }
+                //console.log(response) //Log the response to the console, this is useful for debugging.
+            });
+
+        }
+
     /* Checks the current status of the dependencies for the module and displays 
        it via the dependency install/uninstall button to the user. 
        This is checked each time the app is loaded or when the user 
@@ -58,6 +83,11 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
             if (response.success === true) {
                 $scope.installLabel = response.label;
                 $scope.installLabelText = response.text;
+                $scope.installSDLabelText = response.textSD;
+                $scope.installButtonWidth = response.buttonWidth;
+                if(response.installed){
+                    $scope.hideSDDependency = true;
+                }
             }
             //console.log(response) //Log the response to the console, this is useful for debugging.
         });
