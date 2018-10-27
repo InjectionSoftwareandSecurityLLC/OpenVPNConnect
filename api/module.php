@@ -136,7 +136,7 @@ class OpenVPNConnect extends Module{
 
         $inputData = $this->request->data;
 
-        $open_vpn_cmd = "openvpn --config ";
+        $open_vpn_cmd = "openvpn --log /pineapple/modules/OpenVPNConnect/log/vpn.log --status /pineapple/modules/OpenVPNConnect/log/status.log --config ";
         
         if($inputData[0] != ''){
             $config_name = $inputData[0];
@@ -177,8 +177,8 @@ class OpenVPNConnect extends Module{
         
         if($inputData[4] == true){
         //Share VPN With Clients Connecting
-            $gateway = uciGet("network.lan.gateway");
-            $netmask = uciGet("network.lan.netmask");
+            $gateway = $this->uciGet("network.lan.gateway");
+            $netmask = $this->uciGet("network.lan.netmask");
 
             $this->execBackground("iptables -t nat -A POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
             $this->execBackground("iptables -A FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
@@ -200,8 +200,8 @@ class OpenVPNConnect extends Module{
         unlink("/tmp/vpn_pass.txt");
 
         //Delete any iptable rules that may have been created for sharing connection with clients                
-        $gateway = uciGet("network.lan.gateway");
-        $netmask = uciGet("network.lan.netmask");
+        $gateway = $this->uciGet("network.lan.gateway");
+        $netmask = $this->uciGet("network.lan.netmask");
 
         $this->execBackground("iptables -t nat -D POSTROUTING -s ". $gateway ."/". $netmask. " -o tun0 -j MASQUERADE");
         $this->execBackground("iptables -D FORWARD -s ". $gateway ."/". $netmask . " -o tun0 -j ACCEPT");
