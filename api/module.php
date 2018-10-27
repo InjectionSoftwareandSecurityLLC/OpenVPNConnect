@@ -20,6 +20,9 @@ class OpenVPNConnect extends Module{
             case 'stopVPN':
                 $this->stopVPN();
                 break;
+            case 'checkVPNStatus':
+                $this->checkVPNStatus();
+                break;
             case 'initializeModule':
                 $this->initializeModule();
                 break;
@@ -103,7 +106,7 @@ class OpenVPNConnect extends Module{
     
 
         if($this->checkDependency('openvpn')){
-            exec('opkg remove openvpn-openssl');
+            $this->execBackground('opkg remove openvpn-openssl');
             $messsage = "Dependencies should now be removed! Note: the vpn_config directory is NOT removed in this process. Please wait for the page to refresh...";
         }else{
             if($sd){
@@ -128,6 +131,22 @@ class OpenVPNConnect extends Module{
         $sd = true;
 
         return handleDependencies($sd);
+
+    }
+
+
+    // Checks whether or not OpenVPN is currently running
+    private function checkVPNStatus(){
+        $result = exec("pgrep openvpn");
+
+        if($result){
+            $this->response = array("success" => true,
+            "content" => "VPN Running...");
+            return;
+        }
+
+        $this->response = array("success" => true,
+        "content" => "VPN Stopped...");
 
     }
 

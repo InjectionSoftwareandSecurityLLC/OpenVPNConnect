@@ -96,6 +96,22 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
     // Call the checkDependencies function on page load
     checkDependencies();
 
+    // Function to check if the VPN is currently running or not when re-visiting the module
+    var checkVPNStatus = function() {
+        $api.request({
+            module: 'OpenVPNConnect', 
+            action: 'checkVPNStatus'
+        }, function(response) {
+            if (response.success === true) {
+                $scope.workspace.outputcontent = response.content;
+            }
+            //console.log(response) //Log the response to the console, this is useful for debugging.
+        });
+    }
+    
+    // Call checkVPNStatus function on page load
+    checkVPNStatus();
+
     /* Initializes module by creating necessary folder structures and scanning for uploaded certs
        this function is called each time the app is loaded to make sure the module is set up correctly
     */
@@ -131,7 +147,6 @@ registerController('openVPNConnectController', ['$api', '$scope', '$timeout', '$
         $scope.workspace.config = cert;
     }
     
-
     /* Calls the startVPN function, passes all the form params to the API to run the OpenVPN command
        Users can pass a config, an option password, and optional command line flags to run with the
        openvpn command line utility. Also the shared connection open lets the user share the 

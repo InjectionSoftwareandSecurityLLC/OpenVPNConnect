@@ -1,8 +1,8 @@
 {   
     "name": "OpenVPNConnect",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "platform": "plugin",
-    "progress": "70%",
+    "progress": "100%",
     "state": "in-progress",   
     "released": true,
     "release_version": "1.0",
