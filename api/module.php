@@ -27,7 +27,7 @@ class OpenVPNConnect extends Module{
                 $this->initializeModule();
                 break;
             case 'handleDependencies':
-                $this->handleDependencies();
+                $this->handleDependencies(false);
                 break;
             case 'handleDependenciesSDCard':
                 $this->handleDependenciesSDCard();
@@ -103,7 +103,6 @@ class OpenVPNConnect extends Module{
 
     // Handles dependency installation and removal
     private function handleDependencies($sd){
-    
 
         if($this->checkDependency('openvpn')){
             $this->execBackground('opkg remove openvpn-openssl');
@@ -114,7 +113,6 @@ class OpenVPNConnect extends Module{
                 $this->execBackground('opkg install openvpn-openssl --dest sd');
                 $messsage = "Depedencies should now be installed! (Installed to SD card) Please wait for the page to refresh...";
             }else{
-                $this->execBackground('opkg update');
                 $this->installDependency('openvpn-openssl');
                 $messsage = "Depedencies should now be installed! (Installed to local storage) Please wait for the page to refresh...";
             }
@@ -122,7 +120,8 @@ class OpenVPNConnect extends Module{
         }
          
         $this->response = array("success" => true,
-                                "content" => $messsage);
+                                "content" => $messsage,
+                                "test" => $sd);
     }
 
     // Helper function to handle dependency installation and removal for sd card. Passes the SD flag to the real handleDependencies() function
@@ -189,7 +188,7 @@ class OpenVPNConnect extends Module{
 
 
         if($inputData[3] != ''){
-            $openvpn_flags = escapeshellcmd($inputData[3](=);
+            $openvpn_flags = escapeshellcmd($inputData[3]);
             $open_vpn_cmd .= $openvpn_flags;
         }
 
