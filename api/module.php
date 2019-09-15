@@ -158,7 +158,7 @@ class OpenVPNConnect extends Module{
         $open_vpn_cmd = "openvpn --log /pineapple/modules/OpenVPNConnect/log/vpn.log --status /pineapple/modules/OpenVPNConnect/log/status.log --config ";
         
         if($inputData[0] != ''){
-            $config_name = $inputData[0];
+            $config_name = escapeshellcmd($inputData[0]);
             $open_vpn_cmd .= "/root/vpn_config/" . $config_name . " ";
         }else{
             $this->response = array("success" => false,
@@ -189,9 +189,8 @@ class OpenVPNConnect extends Module{
 
 
         if($inputData[3] != ''){
-            $openvpn_flags = $inputData[3];
-            $open_vpn_cmd .= escapeshellcmd($openvpn_flags);
-            $this->execBackground("echo '" . $open_vpn_cmd . "' > /pineapple/modules/OpenVPNConnect/log/bug.txt");
+            $openvpn_flags = escapeshellcmd($inputData[3](=);
+            $open_vpn_cmd .= $openvpn_flags;
         }
 
         
